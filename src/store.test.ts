@@ -36,6 +36,23 @@ describe("Store Manager", () => {
     reducer.mockClear();
   });
 
+  test("The state should be accessible after it has been modified", () => {
+    const state: State = {
+      init: false,
+    };
+    const store = createStore(reducer, state);
+
+    expect(store.state.init).toEqual(false);
+
+    store.dispatch(Action.Initialise, true);
+
+    expect(store.state.init).toEqual(true);
+
+    store.dispatch(Action.Update, "test");
+
+    expect(store.state.value).toEqual("test");
+  });
+
   test("Subscription is called any time an action is dispatched", () => {
     const subscription = jest.fn();
     const store = createStore(reducer);
@@ -57,6 +74,18 @@ describe("Store Manager", () => {
     store.dispatch(Action.Initialise, true);
 
     expect(subscription).not.toHaveBeenCalled();
+  });
+
+  test("Subscription is called immediately with the current state", () => {
+    const state: State = {
+      init: false,
+    };
+    const subscription = jest.fn();
+    const store = createStore(reducer, state);
+
+    store.subscribe(subscription);
+
+    expect(subscription).toHaveBeenCalledWith(state);
   });
 
   test("Subscription is called only when the requested action is dispatched", () => {

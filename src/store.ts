@@ -23,6 +23,10 @@ export const createStore = <State extends GenericState, Definitions extends Acti
     const deferredSubscription = CancellablePromise.defer(subscription);
     subscriptions.set(id, [deferredSubscription, actions]);
 
+    if (currentState && actions.length === 0) {
+      subscription(currentState);
+    }
+
     return () => {
       subscriptions.delete(id);
     };
@@ -59,10 +63,20 @@ export const createStore = <State extends GenericState, Definitions extends Acti
       reducedState,
     );
 
-    affectedSubscriptions.forEach((subscription) => subscription(newState, action));
+    // Comparison is done by reference. While interceptors will always get executed,
+    // subscriptions will only run if the state reference has been modified.
+    if (currentState !== newState) {
+      affectedSubscriptions.forEach((subscription) => subscription(newState, action));
 
-    currentState = newState;
+      currentState = newState;
+    }
   };
 
-  return { subscribe, intercept, dispatch };
+  const state: State = new Proxy<State>({} as State, {
+    get(_, property) {
+      return currentState?.[property as keyof State];
+    },
+  });
+
+  return { subscribe, intercept, dispatch, state } as const;
 };
