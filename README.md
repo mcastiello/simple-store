@@ -118,7 +118,7 @@ const initialState: State = {
 // Create the reducer function
 const reducer: Reducer<State, Definitions> = (state, action) => {
   switch (action.type) {
-    case Action.Value:
+    case Action.SetValue:
       return { ...state, value: action.payload };
   }
 };
