@@ -13,7 +13,7 @@ export type StoreSubscription<State extends GenericState, Definitions extends Ac
   ActionType extends keyof Definitions,
 >(
   state: State,
-  action: ActionOf<Definitions, ActionType>,
+  action?: ActionOf<Definitions, ActionType>,
 ) => void | PromiseLike<void>;
 
 export type StoreInterceptor<State extends GenericState, Definitions extends ActionsDefinitions<keyof Definitions>> = <
@@ -40,8 +40,9 @@ export type StoreDispatcher<Definitions extends ActionsDefinitions<keyof Definit
   ...args: ActionParameters<Definitions, ActionType>
 ) => void;
 
-export type Store<State extends GenericState, Definitions extends ActionsDefinitions<keyof Definitions>> = {
+export type Store<State extends GenericState, Definitions extends ActionsDefinitions<keyof Definitions>> = Readonly<{
   subscribe: StoreSubscribe<State, Definitions>;
   intercept: StoreIntercept<State, Definitions>;
   dispatch: StoreDispatcher<Definitions>;
-};
+  state: Partial<Readonly<State>>;
+}>;
